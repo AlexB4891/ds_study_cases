@@ -1,0 +1,178 @@
+---
+title: "Genetic code of bacteria"
+author: "Alex Bajaña"
+date: "6/5/2020"
+output:
+  html_document:
+    df_print: paged
+    toc: true
+    toc_float: true
+    highlight: breezedark
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, message=FALSE,warning=FALSE)
+
+library(seqinr)
+library(tidyverse)
+library(broom)
+
+```
+
+## Set up
+
+In order to reproduce Gorban & Zinovyev paper about the use of PCA and K-Means to decipher genome first it's necesary to get the genomic data of _Caulobacter Crescentus_. In this reproduction I will use R.
+
+```{r, eval=FALSE}
+
+install.packages("seqinr")
+
+```
+
+
+# Reading data
+
+Read the Fasta file:
+
+```{r}
+sequence <- read.fasta("http://www.ihes.fr/~zinovyev/pcadg/ccrescentus.fa")
+```
+
+Now I will separate the genome in strings of length 300. In order to do that, first I create two functions:
+
+# Creating frequency tables
+
+```{r}
+sep_vector <- function(vector,by){
+  
+  seq(by + 1,length(vector),by = by) %>% 
+    map(~{
+      
+      vector[(.x-by):(.x-1)] 
+      
+    }) 
+  
+}
+
+```
+
+This functions takes a `vector` of charactes (all the genome), then `by` declares de length of the subset vectors saved in a list.
+
+Now we have the genes in the list, as the goal of is to separte the genes in characters of lengt 1 to 4, I create another function which does:
+
+- Separate the gene given a `length`
+- Collapse the fragments
+- Create a table with the frequency of each fragment
+- Turn the table wide
+
+All this operations, given a sequence subseted using `sep_vector`.
+
+```{r}
+subs_freq <- function(length, ...){
+  sep_vector(...) %>% 
+    # map(length)
+    map(~sep_vector(.x,length) %>% 
+          map(str_c,collapse = "") %>% 
+          unlist %>% 
+          table %>% 
+          enframe %>% 
+          spread(name,value)
+    ) %>% 
+    reduce(bind_rows)
+}
+```
+
+
+Then a table for each fragment legth is generated:
+
+```{r}
+string_separated <- map(1:4,subs_freq,vector = sequence$fragment,by = 300)
+```
+
+# PCA
+
+The tables are saved in a list, in order to processing all in one sentence functional programming is used in combination with `tidyverse` framework.
+
+```{r}
+
+nested_pca <- string_separated %>% 
+  map(~.x %>% 
+        mutate_all(~replace_na(.,0)) %>% 
+        nest() %>%
+        mutate(pca = map(data,~prcomp(.x,scale. = TRUE,center = TRUE)))
+        
+        )
+```
+
+First lets see some information about PCA for each table:
+
+```{r}
+performance <- nested_pca %>% 
+  map(~{
+    .x$pca %>% 
+      map(~tidy(.x,"pcs")) %>% 
+      as.data.frame
+  })
+
+```
+
+Let's see the percentage of variance explained by each component:
+
+```{r, out.width = '100%'}
+map2(1:4,performance,~.y %>% mutate(length = str_c("N = ",.x))) %>% 
+  reduce(bind_rows) %>% 
+  gather("var","value",-PC,-length) %>% 
+  mutate(var = str_to_title(var)) %>% 
+  ggplot(aes(x = PC,y = value,fill = var)) +
+  geom_bar(stat = "identity",position = "dodge") + 
+  facet_grid(.~length,scales = "free") +
+  labs(x = "Number of components", y = "Value",fill = "Explained") + 
+  theme_minimal()
+```
+
+Extracting the components value:
+
+```{r}
+components <- nested_pca %>% 
+  map(~.x %>% 
+        
+        mutate(pca_aug = map2(pca,data,~augment(.x,.y))) %>% 
+        unnest(pca_aug) %>% 
+        select(matches("PC"))
+        )
+```
+
+Ploting between first and second component:
+
+```{r, out.width = '100%'}
+map2(1:4,components,~.y %>% mutate(length = str_c("N = ",.x)) %>% select(length,.fittedPC1, .fittedPC2)) %>% 
+  reduce(bind_rows) %>% 
+  ggplot(aes(x =.fittedPC1,y = .fittedPC2, color = length )) +
+  geom_point(size = 0.2)+
+  facet_wrap(length~.,nrow = 2,ncol = 2,scales = "free") + 
+  labs(x = "PC1", y = "PC2", color = "Codon")+ 
+  theme_minimal()
+```
+
+# Clustering
+
+```{r}
+clusters <- components[[3]] %>% 
+  select(2,3) %>%
+  nest(data = everything()) %>% 
+  mutate(kmeans = map(data,~kmeans(.x,7)),
+         points = map2(data,kmeans,~augment(.y,.x)) # En augment va primero kmeans, leugo data
+         ) %>% 
+  unnest(points)
+```
+
+Visualize the clusters:
+
+```{r, out.width = '100%'}
+clusters %>% 
+  ggplot(aes(x = .fittedPC1, y =.fittedPC2, color = factor(.cluster))) +
+  geom_point() + 
+  labs(x = "PC1", y = "PC2", color = "Cluster") + 
+  theme_minimal()
+```
+
