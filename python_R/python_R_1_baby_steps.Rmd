@@ -1,0 +1,607 @@
+---
+title: "Baby steps from R to Python"
+author: "Alex Bajaña"
+date: "8/5/2020"
+output: 
+  html_document:
+    highlight: breezedark
+---
+
+<style>
+.column-left{
+  float: left;
+  width: 50%;
+  text-align: left;
+}
+
+
+.column-right{
+  float: left;
+  width: 50%;
+  text-align: left;
+}
+</style>
+
+```{r}
+
+library(reticulate)
+
+```
+
+I have been working with R three years, during this time I have use it for web development, data science and other uses I have never imagined before. The beauty of it the community support that empowers this open source tool. As my knowledge grows, the questions did too, now I have curiosity about other tool of the same kind: Python. In this brief document I will make a revision of the basic elements of both languages, my goal is not to compare them in order to conclude which is better, but make a useful guide to understand the equivalent sentences and learn about them.
+
+This document is wrote as a Rmarkdown document, to use both lenguages first we must install `reticulate` package.
+
+```{r, eval=FALSE}
+install.packages("reticulate")
+```
+
+To include chuncks we must do:
+
+```{r, eval=FALSE}
+
+# R chunk:
+
+# ```{r, eval=FALSE}
+
+# ```
+
+# Python chunk:
+
+# ```{python, eval=FALSE}
+
+# ```
+
+```
+
+
+
+
+
+Tha classic begign: "Hello word" example: both languages use `print` function in the same way:
+
+```{r}
+print("hello world")
+```
+
+Now that we took the first step, lets see something more.
+
+# Variables
+
+In R we have objects that can be an atomic, or collection of many. They work the same as variables in pyton:
+
+<div class = "column-left">
+
+## R:
+
+```{r}
+# Doubles
+x <- 9
+# Booleans
+y <- TRUE
+# Characters
+z <- "This is a character"
+```
+
+</div>
+
+
+<div class = "column-right">
+
+## Python:
+
+```{python}
+# Numbers:
+x = 9
+# Booleans
+y = True
+# Strings
+z = "This is a string"
+```
+
+</div>
+
+---
+
+
+There's a serious (and I'm not exagerating) debate which symbol to use in assignation in R, `=` or `<-`, personally I use the second one. Until this point there's nothing to say about a difference between the languages, just about the notation of booleans, in R all are capital letters, in Python just the first letter.
+
+Let's complicate things up. 
+
+# Control flow 
+
+`if/else` statements are often used to execute some operations when a condition is met and execute other when is not. Let's see an example: given the value of gini indicator (measure of inequality, considering income for example), a country is considered unequal if the value is near to 100, let's put an arbitrary treshold, for example if the value is above 60 is unequal, in other case is equal.
+
+<div class = "column-left">
+
+## R:
+
+```{r}
+gini <- 68
+
+if(gini > 60){
+  print("The country is unequal")
+} else{
+  print("The country is equal")
+}
+```
+
+</div>
+
+
+<div class = "column-right">
+
+## Python:
+
+```{python}
+gini = 43
+
+if gini > 60:
+  print("The country is unequal")
+else:
+  print("The country is equal")
+  
+```
+
+</div>
+
+First of all I will say that I prefer to mantain in R all the curly braces, I think it keeps the idea o order, but it's posible to avoid the use of them. My first observation is that condition must not be inside parenthesis and the use of `:` before the sentence when using python. Otherwise the idea and syntax are similar. But what happens when there's more than 1 condition, let's say that countries with gini value under 30 are equal, those that have a value between 30 and 70 should take precautions, and those values above 70 are unequal. There will be a slightly difference:
+
+<div class = "column-left">
+
+## R:
+
+```{r}
+gini <- 90
+
+if(gini < 30){
+  print("The country is equal")
+} else if(gini > 30 & gini < 70){
+  print("The should take precations about inequality")
+}else{
+  print("The country is unequal")
+}
+```
+
+</div>
+
+
+<div class = "column-right">
+
+## Python:
+
+```{python}
+gini = 43
+
+if gini < 30:
+  print("The country is equal")
+elif gini > 30 and gini < 70:
+  print("The should take precations about inequality")
+else:
+  print("The country is equal")
+  
+```
+
+</div>
+
+In this example there are some difference. First or operator are different, in R it's used `&` in the other hand in pyhton is used `and`, as in R it's used an `if` statement after the first `else` to include a new condition, in python there's the `elif` operator.
+
+# Loops
+
+The first loop I will cover will be `while` statement. Let's think of a machine that counts coins we save, we will put the coins until it's full and the machine will tell us when it's full when inside there are 4 coins.
+
+<div class = "column-left">
+
+## R:
+
+```{r}
+coins <- 0
+
+while (coins <= 3) {
+  
+  coins <- coins + 1 
+  
+  print(coins)
+  
+  if(coins == 4){
+    print("Your have reached your goal!")
+  }
+}
+```
+
+</div>
+
+
+<div class = "column-right">
+
+## Python:
+
+```{python}
+coins = 0
+
+while coins <= 3:
+  
+  coins = coins + 1 
+  
+  print(coins)
+  
+  if coins == 4:
+    print("Your have reached your goal!")
+  
+  
+```
+
+</div>
+
+Again, the main difference is the use parenthesys when writing the condition. Another main idea that python is indent sensitive. Let's see an example, I will eliminates all indents in both languages and se what happens:
+
+<div class = "column-left">
+
+## R:
+
+```{r}
+coins <- 0
+
+while (coins <= 3) {
+
+coins <- coins + 1 
+
+print(coins)
+
+if(coins == 4){
+  print("Your have reached your goal!")
+}
+}
+```
+
+</div>
+
+
+<div class = "column-right">
+
+## Python:
+
+```{python, eval = FALSE}
+coins = 0
+
+while coins <= 3:
+  
+coins = coins + 1 
+  
+print(coins)
+  
+if coins == 4:
+print("Your have reached your goal!")
+#
+# 
+#
+```
+
+```{r}
+# Returns:
+# Error: expected an indented block(<string>, line 5) 
+#
+#
+#
+```
+
+
+</div>
+
+But not having indents makes code less readable, so please does not ommit them.
+
+Now let's see what happens with `for` loops. Let's make an obvous but ilustrative example, we want to see what numer in a sequence are odd or even. This example will mark a big difference between the two languages:
+
+<div class = "column-left">
+
+## R:
+
+```{r}
+
+for (i in 1:5) {
+  num <- i/2L
+  print(is.integer(num))
+}
+
+```
+
+</div>
+
+
+<div class = "column-right">
+
+## Python:
+
+```{python}
+for i in range(1,6):
+  num = i/2
+  print(num.is_integer())
+  
+```
+
+</div>
+
+Let's see the differences line by line. First, declaring a sequence in R just take `begin:end` to make it, but in pyhon you must use `range` but the last one has some particularities we need to discuss. This functión allows us to declare a step in the same way that `seq` function does in R, but as you can see the end of the sequence is declared plus one. So, `seq(1,5)` in R is equal to use `range(1,6)` in pyton. Now, the classic observation: in pythin you don't need parenthesys declaring conditions, but in this case there's no need to use it in declaring the counter.
+
+But the big difference between the two languages is how they handdle integer numbers. In R we must declare them explicitly like `6L, 4L, 5L`, but python takes the number and evaluate the existence of decimals and determine if there's a continous or integer number. That's why every value in R loop gives `FALSE` value. 
+
+Other big difference is how you pass functions over an object. As you can see, in R the function `is.integer()` is applied to the object `num` rounding the last in parenthesys `is.integer(num)`. But in python first goes the object then a point and then the function `num.is_integer()`. 
+
+Let's make some changes to get the same results. 
+
+<div class = "column-left">
+
+## R:
+
+```{r}
+
+for (i in 1:5) {
+  num <- i %% 2
+  print(num == 0)
+}
+
+```
+
+</div>
+
+
+<div class = "column-right">
+
+## Python:
+
+```{python}
+for i in range(1,6):
+  num = i/2
+  print(num.is_integer())
+  
+```
+
+</div>
+
+I must admit that python makes really easy this task. After the changes what had been done was: first we evaluate the entire part of the division of the `i` number by two, then checking the entire part of the division we will conclude if the number is divisible by two, that's the same to say that is even.
+
+# Collections
+
+In R we have colections of elements called vectors, these are the basic element that R will work with. The principal property of vectors is that in one of them you must collect elements of the same kind. For example if we declare a collection of nombers we must use `c()`, like `vector <- c(1,2,4)` that would have those numbers. But it's not allowed to do `vector <- c(1,"a")` because the elements are not of the same clase. In order to do that, say collect many objet of different class, we must use lists `list()` and is this concept that have it's equal in python, but there's a difference we must take in count when working with one or another.
+
+## Lists of same class
+
+<div class = "column-left">
+
+## R:
+
+```{r}
+integers <- list(1L,2L,5L,8L)
+```
+
+</div>
+
+
+<div class = "column-right">
+
+## Python:
+
+```{python}
+integers = [1 ,2, 5, 8]
+```
+
+</div>
+
+As we discuss earlier in R we must declare explicitly integers using `L` after the number. Now surges a question: how can I subset my lists. In R the index of each element begins in 1, in the other hand, in python the indexes begin in 0. Let's see an example: we have the same list in both languages:
+
+<div class = "column-left">
+
+## R:
+
+```{r}
+integers <- list(1L,2L,5L,8L)
+print(integers[1])
+print(integers[4])
+```
+
+</div>
+
+
+<div class = "column-right">
+
+## Python:
+
+```{python}
+integers = [1 ,2, 5, 8]
+#
+print(integers[0])
+#
+print(integers[3])
+```
+
+</div>
+
+In addition to the difference in indexes, in R we know we are using lists instead of a vector for how the element is printed in console, as you can see there's a `[[1]]` that says we are seeing the element as list of one element, this happens because we are subseting a list using the position and ask R to return a list and using a single bracket `[`. If we want to get the element as a vector in the same way as in python we should do:
+
+<div class = "column-left">
+
+## R:
+
+```{r}
+integers <- list(1L,2L,5L,8L)
+print(integers[[1]])
+print(integers[[4]])
+```
+
+</div>
+
+
+<div class = "column-right">
+
+## Python:
+
+```{python}
+integers = [1 ,2, 5, 8]
+print(integers[0])
+print(integers[3])
+```
+
+</div>
+
+Until now I must confess that R has such a complexity compared to python, but I see a good reason to that: know you are doing something especific and have control over it. 
+
+Now, imagine we must add elements to a list, for example we want to create a list that stores the last series I watched:
+
+<div class = "column-left">
+
+## R:
+
+```{r}
+series <- list()
+series[[1]] <- "Better call Saul"
+series[[2]] <- "Rick and Morty"
+
+print(series)
+```
+
+</div>
+
+
+<div class = "column-right">
+
+## Python:
+
+```{python}
+series = []
+series.append("Better call Saul")
+series.append("Rick and Morty")
+
+print(series)
+#
+#
+#
+#
+```
+
+</div>
+
+In R we can assign elements to a list using the position of a list, bout we must know the number of the elements that are present in the list. An alternative could be:
+
+<div class = "column-left">
+
+## R:
+
+```{r}
+series <- list()
+series <- append(series, "Better call Saul")
+series <- append(series, "Rick and Morty")
+
+print(series)
+```
+
+</div>
+
+
+<div class = "column-right">
+
+## Python:
+
+```{python}
+series = []
+series.append("Better call Saul")
+series.append("Rick and Morty")
+
+print(series)
+#
+#
+#
+#
+```
+
+</div>
+
+# Named lists and dictionaries
+
+Now that we know how a list works, we must want to create a list where we could see the attributes of Todd Chavez:
+
+<div class = "column-left">
+
+## R:
+
+```{r}
+bh_char <- list(
+  name = "Todd Chavez",
+  age = 24
+)
+
+print(paste("Bojack no best friend is",bh_char$name))
+print(paste("he is",bh_char$age,"years old"))
+```
+
+</div>
+
+
+<div class = "column-right">
+
+## Python:
+
+```{python}
+bh_char ={ 
+  "name" : "Todd Chavez",
+  "age" : 24
+}
+
+print("Bojack no best friend is %s" %(bh_char["name"]))
+print("he is %i" %(bh_char["age"]))
+
+```
+
+</div>
+
+Let's denote some interesting facts. As you can see in R subsetting a list takes the `$` operator after the name of the list, while in python you use the single bracket and the name of the attribute. Another thing is that while in R I have used the `paste` function to concatenate a string and the element inside the list, while in python it takes a expression that ends `%s` that stand for `string`, see that after the quoted string, there's a `%(bh_char["name"])` that tells python that is the element name, from `bh_char` dictionary, what it's looking for. In the next line instead of using `%s` there's a `%i` denoting that now it must replace this last value with the attribute age from the dictionary. In R there's no need (in this particular case) to declare the class of the element thar is being concatenated, it applies its coercion rules to make the concatenation. 
+
+Now let's put all together. We must want to create a loop that creates a presentation card from a list, and will be printed in console. Let's do it.
+
+<div class = "column-left">
+
+## R:
+
+```{r}
+id_card <- list(
+  name = "Alex",
+  age = 24,
+  nationality = "Ecuadorian"
+)
+
+for (attr in names(id_card)){
+  print(paste("My",attr,"is",id_card[[attr]]))
+}
+
+```
+
+</div>
+
+
+<div class = "column-right">
+
+## Python:
+
+```{python}
+id_card ={ 
+  "name" : "Alex",
+  "age" : 24,
+  "nationality" : "Ecuadorian"
+}
+
+for attr,value in id_card.items():
+  print("My %s is %s" %(attr,value))
+#
+```
+
+</div>
+
+This last operations blew my mind, I really liked that you could declare two counters got from the function `items()` applid to `id_card` dictionary in python. The usage of `%s` to concatenate the strings remember me the way `sprintf` works in R. 
+
+# Final comments
+
+The review done here had helped me understand python language, I hope that help you too. Both language are constructed with a logic, we must understand in order to choose one or the other, and why not the both, here I haven't discussed efficiency, I'm sure there's a lot of work in that field. This is just my appreciation of both of them. Learning any open source language is an exciting adventure and there's always something knew to learn, I really like this live nature of them. So, after this review if someone ask me which I prefer I will say: 
+
+<center>
+
+![](https://www.24a11y.com/wp-content/uploads/why-not-both.jpg)
+</center>

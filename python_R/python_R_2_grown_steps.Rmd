@@ -1,0 +1,94 @@
+---
+title: "Grown up steps from R to Python"
+author: "Alex Bajaña"
+date: "10/5/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+In my last article I discussed some differences between syntax in R and Python, my personal conclusion was that each of them has its logic and that's the richness of open source code: retrieve an environment in which each analist could feel confortable writin in it. In this new article I will follow the same logic: not comparing them in order to say which is better, efficient, or whatever, instead I write for learning and share with everyone who is interested in that goal too. The last part of my past article was named list as we call it in R and dictionaries as they're called un python. Now it's time to discuss one of the beauties of prograaming, that I think makes tremendously powerful tool: object oriented programming. 
+
+# Classes and objects
+
+There are two key concepts in object oriented programming: objects that have **attributes** and **methods**. An oversimplification could be: if and object has a determined class then the object will first evaluate this class and then will operate accordingly to this class. In my experience this saves a lot of effort when programming because you must not need to create a condition for each element in a certain process, but you must declare how a function (or method) will respond for each possible class that it will encounter.
+
+In R, elements that differ from basic or atomic elements are denominated S3 elements. An example could help us. Imagine a categorical variable, let's say: gender, it could take two values: "Male" and "Famele", in this particular case it's not important and especific order or logic, but what about a variable that describes the level of education of a person, then the variable has an order we must respect like "Basic education", "Middle eduation", "College", "Master degree". Now if we create a vector with this categories as strings the order does not matter. Let's see an example: in a survey 300 persons were asked about for their education level, and now we want to see the frequency of each response:
+
+```{r}
+
+set.seed(1984)
+
+lvl_edu <- sample(x = c("Basic","Middle","College","Master"),size = 300,replace = T)
+
+summ <- table(lvl_edu)
+
+
+barplot(summ)
+```
+
+As you can see in the plot the x labels are ordered alphabetically, but we want the order defined by the variable logic. R has this fabulous object called `factors`, that are S3 objects, first let's see how this plot changes useng them, then we discuss it's particularities.
+
+```{r}
+
+set.seed(1984)
+
+lvl_edu <- sample(x = c("Basic","Middle","College","Master"),size = 300,replace = T)
+
+lvl_edu_f <- factor(lvl_edu,levels = c("Basic","Middle","College","Master"))
+
+summ_2 <- table(lvl_edu_f)
+
+barplot(summ_2)
+
+```
+
+Now we have a correct order of our variable. Some details, always remember to respect the reproducibility principle, this is a really useful concept that I will not discuss here, but I strongly recommend to read about it. Now, set.seed creates a sequence of pseudo random numers, I declare the same in both graphics to compare them, `sample` function creates a sample of given length with the elements of a given vector, the argument replacement allows to have repetitions in the vector, `table` count the times a certain element appear in a vector, really useful summary function. And last `barplot` takes the summary from table and creates a quinck frequency plot.
+
+To the point, in the second graph `factor` function gets the same vector we used in the first plot and with a **ordered** vector creates a variable with a logic or order. But what makes it different from a character vector? The answer will be provided by `attributes` function.
+
+
+```{r}
+
+attributes(lvl_edu)
+
+attributes(lvl_edu_f)
+
+```
+
+As you can see, when we check `lvl_edu` object there's no attribute to show because it still remain as an atomic elemnent. But, if we check the `lvl_edu_f` we see it has two attributes: `levels` and `class`. The existence of this two elements changes the behavior of `barplot` function, changing the order of the lables in our plot. 
+
+
+```{r}
+
+typeof(lvl_edu)
+
+typeof(lvl_edu_f)
+
+```
+
+Now let's see the result from `typeof` function. For our surprise when we pass this function over `lvl_edu_f` it says that we are handling a integer, what does that mean? Well, this comes with the idea of order. As "Primary" should be the first category, `factor` function assign to it the value of 1, then to "Middle" the value of 2, and so on. This function that creates an element of class `factor` or any other that assign a class to an object it's called "constructor". Now let's see what's inside the `barplot` function.
+
+```{r}
+print(barplot)
+```
+
+Discussion about functions will be for other document. Focuss in the `UseMethod("barplot")` sentence, it says that exist a method called "barplot" and will be executed when the `barplot` function is called. Using `methods` function over `barplot` will tell us that this last function will act different when the object is a formula or by default in other case. Let's see a more ilustrative example.
+
+```{r}
+summary(lvl_edu)
+summary(lvl_edu_f)
+```
+
+Now we can see a bif difference using the method "summary". Let's check inside it
+
+```{r}
+methods(summary)
+```
+
+Now we see a collection of many classes that are declared for this method to work with. As you can see, like in `barplot` mehtod we have a behavior declared as default, that it's used when passing a character vector, and a bahavior declared expecificly for factor. This is the magic of classes and methods. 
+
+Now this, not very brief review of classes and methods in R have settled down some concepts to keep our work.
+
